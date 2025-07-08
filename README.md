@@ -1,6 +1,14 @@
-int string =20;
-x = 5;
-y = 10;
-x+y;
-scanf("x+y")
-printf("y")
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>My First JavaScript</h2>
+
+<button type="button"
+onclick="document.getElementById('demo').innerHTML = Date()">
+Click me to display Date and Time.</button>
+
+<p id="demo"></p>
+
+</body>
+</html> 
