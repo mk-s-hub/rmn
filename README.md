@@ -72,6 +72,14 @@ CSS::
   gap: 1rem;
 }
 
+
+import org.mindrot.jbcrypt.BCrypt;
+
+// Hash password
+String hashedPassword = BCrypt.hashpw("userPassword", BCrypt.gensalt());
+
+// Verify password
+boolean isValid = BCrypt.checkpw("userPassword", hashedPassword);
 .login-form h2 {
   margin-bottom: 1rem;
   text-align: center;
@@ -112,13 +120,39 @@ CSS::
   transition: background 0.2s;
 }
 
-.login-form button:hover {
-  background: #245bb5;
-}
+import org.mindrot.jbcrypt.BCrypt;
 
-@media (max-width: 500px) {
-  .login-form {
-    padding: 1rem;
-    max-width: 95vw;
-  }
+// Hash password
+String hashedPassword = BCrypt.hashpw("userPassword", BCrypt.gensalt());
+
+// Verify password
+boolean isValid = BCrypt.checkpw("userPassword", hashedPassword);
+
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+            .authorizeRequests()
+            .antMatchers("/public/**").permitAll()
+            .antMatchers("/admin/**").hasRole("ADMIN")
+            .anyRequest().authenticated()
+            .and()
+            .formLogin()
+            .loginPage("/login")
+            .permitAll()
+            .and()
+            .logout()
+            .permitAll();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication()
+            .withUser("admin").password("{noop}admin123").roles("ADMIN")
+            .and()
+            .withUser("student").password("{noop}student123").roles("STUDENT");
+    }
 }
