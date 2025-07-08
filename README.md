@@ -1,1 +1,1 @@
-# rmn
+int string =20;
