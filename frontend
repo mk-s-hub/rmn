@@ -290,6 +290,127 @@
             text-align: center;
         }
         
+        /* Password strength indicator */
+        .password-strength {
+            height: 5px;
+            background-color: #eee;
+            margin-top: 5px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        /* OTP input styles */
+        .otp-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .otp-input {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 18px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .otp-input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .resend-otp {
+            text-align: center;
+            margin-top: 15px;
+            color: #7f8c8d;
+        }
+        
+        .resend-otp a {
+            color: #3498db;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .resend-otp a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Forgot password link */
+        .forgot-password {
+            text-align: right;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+        
+        .forgot-password a {
+            color: #3498db;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Verification steps */
+        .verification-steps {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+            flex: 1;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background-color: #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        
+        .step.active .step-number {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .step-title {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .step.active .step-title {
+            color: #3498db;
+            font-weight: 500;
+        }
+        
+        .step.completed .step-title {
+            color: #27ae60;
+        }
+        
         /* Responsive styles */
         @media (max-width: 768px) {
             .activity-card {
@@ -326,6 +447,16 @@
                 margin: 15px;
                 width: calc(100% - 30px);
             }
+            
+            .otp-container {
+                gap: 5px;
+            }
+            
+            .otp-input {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -345,6 +476,14 @@
             
             .modal-footer .btn {
                 width: 100%;
+            }
+            
+            .verification-steps {
+                gap: 10px;
+            }
+            
+            .step-title {
+                font-size: 10px;
             }
         }
     </style>
@@ -401,6 +540,16 @@
                 <h4>Password</h4>
                 <p id="password-change-info">Last changed 2 weeks ago</p>
                 <button class="btn btn-outline" id="change-password">Change Password</button>
+                <div class="forgot-password">
+                    <a href="#" id="forgot-password">Forgot Password?</a>
+                </div>
+            </div>
+            
+            <div class="preference-item">
+                <h4>Mobile Number</h4>
+                <p id="mobile-number-info">+1 (555) 123-4567</p>
+                <button class="btn btn-outline" id="change-mobile">Change Mobile Number</button>
+                <p style="font-size: 13px; color: #7f8c8d; margin-top: 5px;">Used for account recovery and OTP verification</p>
             </div>
             
             <div class="preference-item" style="border-bottom: none;">
@@ -476,7 +625,10 @@
             <div class="form-group">
                 <label for="new-password">New Password</label>
                 <input type="password" id="new-password" placeholder="Enter your new password">
-                <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">Password must be at least 8 characters long</p>
+                <div class="password-strength">
+                    <div class="strength-bar" id="strength-bar"></div>
+                </div>
+                <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">Password must be at least 8 characters long with a mix of letters, numbers, and symbols</p>
             </div>
             <div class="form-group">
                 <label for="confirm-password">Confirm New Password</label>
@@ -486,6 +638,101 @@
             <div class="modal-footer">
                 <button class="btn btn-outline" id="cancel-password">Cancel</button>
                 <button class="btn btn-primary" id="save-password">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal" id="forgot-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Your Password</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div id="forgot-step1">
+                <p>Enter your email address to receive a password reset link:</p>
+                <div class="form-group">
+                    <label for="forgot-email">Email Address</label>
+                    <input type="email" id="forgot-email" placeholder="your@email.com">
+                </div>
+                <div id="forgot-error" style="color: #e74c3c; margin-bottom: 15px; display: none;"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="cancel-forgot">Cancel</button>
+                    <button class="btn btn-primary" id="send-reset-link">Send Reset Link</button>
+                </div>
+            </div>
+            <div id="forgot-step2" style="display: none;">
+                <p><i class="fas fa-envelope" style="font-size: 24px; color: #3498db;"></i></p>
+                <h4>Reset Link Sent</h4>
+                <p>We've sent a password reset link to your email address. Please check your inbox and follow the instructions.</p>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="close-forgot">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Verification Modal -->
+    <div class="modal" id="mobile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Mobile Number</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="verification-steps">
+                <div class="step active" id="step1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Enter Number</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Verify OTP</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Complete</div>
+                </div>
+            </div>
+            
+            <div id="mobile-step1">
+                <div class="form-group">
+                    <label for="new-mobile">New Mobile Number</label>
+                    <input type="tel" id="new-mobile" placeholder="+1 (___) ___-____">
+                </div>
+                <div id="mobile-error" style="color: #e74c3c; margin-bottom: 15px; display: none;"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="cancel-mobile">Cancel</button>
+                    <button class="btn btn-primary" id="send-otp">Send OTP</button>
+                </div>
+            </div>
+            
+            <div id="mobile-step2" style="display: none;">
+                <p>We've sent a 6-digit verification code to <strong id="otp-number-display"></strong>. Please enter it below:</p>
+                <div class="otp-container">
+                    <input type="text" class="otp-input" maxlength="1" data-index="0">
+                    <input type="text" class="otp-input" maxlength="1" data-index="1">
+                    <input type="text" class="otp-input" maxlength="1" data-index="2">
+                    <input type="text" class="otp-input" maxlength="1" data-index="3">
+                    <input type="text" class="otp-input" maxlength="1" data-index="4">
+                    <input type="text" class="otp-input" maxlength="1" data-index="5">
+                </div>
+                <div class="resend-otp">
+                    Didn't receive code? <a href="#" id="resend-otp">Resend OTP</a>
+                </div>
+                <div id="otp-error" style="color: #e74c3c; margin-bottom: 15px; text-align: center; display: none;"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="back-to-mobile">Back</button>
+                    <button class="btn btn-primary" id="verify-otp">Verify</button>
+                </div>
+            </div>
+            
+            <div id="mobile-step3" style="display: none; text-align: center;">
+                <p><i class="fas fa-check-circle" style="font-size: 24px; color: #27ae60;"></i></p>
+                <h4>Mobile Number Updated</h4>
+                <p>Your mobile number has been successfully updated and verified.</p>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="finish-mobile">Done</button>
+                </div>
             </div>
         </div>
     </div>
@@ -645,7 +892,9 @@
             // Modal functionality
             const modals = {
                 '2fa': document.getElementById('2fa-modal'),
-                'password': document.getElementById('password-modal')
+                'password': document.getElementById('password-modal'),
+                'forgot': document.getElementById('forgot-modal'),
+                'mobile': document.getElementById('mobile-modal')
             };
             
             const openModal = (modalId) => {
@@ -668,6 +917,8 @@
             
             document.getElementById('cancel-2fa').addEventListener('click', () => closeModal('2fa'));
             document.getElementById('cancel-password').addEventListener('click', () => closeModal('password'));
+            document.getElementById('cancel-forgot').addEventListener('click', () => closeModal('forgot'));
+            document.getElementById('cancel-mobile').addEventListener('click', () => closeModal('mobile'));
             
             // Close modal when clicking outside content
             Object.values(modals).forEach(modal => {
@@ -722,6 +973,34 @@
                 openModal('password');
             });
             
+            // Password strength indicator
+            document.getElementById('new-password').addEventListener('input', function() {
+                const password = this.value;
+                const strengthBar = document.getElementById('strength-bar');
+                let strength = 0;
+                
+                // Length check
+                if (password.length >= 8) strength += 20;
+                if (password.length >= 12) strength += 20;
+                
+                // Character variety checks
+                if (/[A-Z]/.test(password)) strength += 20;
+                if (/[0-9]/.test(password)) strength += 20;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 20;
+                
+                // Update the strength bar
+                strengthBar.style.width = strength + '%';
+                
+                // Color coding
+                if (strength < 40) {
+                    strengthBar.style.backgroundColor = '#e74c3c';
+                } else if (strength < 80) {
+                    strengthBar.style.backgroundColor = '#f39c12';
+                } else {
+                    strengthBar.style.backgroundColor = '#27ae60';
+                }
+            });
+            
             document.getElementById('save-password').addEventListener('click', function() {
                 const currentPass = document.getElementById('current-password').value;
                 const newPass = document.getElementById('new-password').value;
@@ -760,6 +1039,158 @@
                 document.getElementById('current-password').value = '';
                 document.getElementById('new-password').value = '';
                 document.getElementById('confirm-password').value = '';
+                document.getElementById('strength-bar').style.width = '0';
+            });
+            
+            // Forgot Password Flow
+            document.getElementById('forgot-password').addEventListener('click', function(e) {
+                e.preventDefault();
+                openModal('forgot');
+            });
+            
+            document.getElementById('send-reset-link').addEventListener('click', function() {
+                const email = document.getElementById('forgot-email').value;
+                const errorElement = document.getElementById('forgot-error');
+                
+                // Simple email validation
+                if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    errorElement.textContent = 'Please enter a valid email address';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // In a real app, you would send a reset link to the email
+                // For demo, we'll just show the success step
+                document.getElementById('forgot-step1').style.display = 'none';
+                document.getElementById('forgot-step2').style.display = 'block';
+            });
+            
+            document.getElementById('close-forgot').addEventListener('click', function() {
+                closeModal('forgot');
+                // Reset modal for next time
+                document.getElementById('forgot-step1').style.display = 'block';
+                document.getElementById('forgot-step2').style.display = 'none';
+                document.getElementById('forgot-email').value = '';
+                document.getElementById('forgot-error').style.display = 'none';
+            });
+            
+            // Mobile Number Change Flow
+            document.getElementById('change-mobile').addEventListener('click', function() {
+                openModal('mobile');
+            });
+            
+            document.getElementById('send-otp').addEventListener('click', function() {
+                const mobileNumber = document.getElementById('new-mobile').value;
+                const errorElement = document.getElementById('mobile-error');
+                
+                // Simple validation
+                if (!mobileNumber || mobileNumber.length < 10) {
+                    errorElement.textContent = 'Please enter a valid mobile number';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // In a real app, you would send OTP to the mobile number
+                // For demo, we'll proceed to OTP verification step
+                document.getElementById('mobile-step1').style.display = 'none';
+                document.getElementById('mobile-step2').style.display = 'block';
+                document.getElementById('otp-number-display').textContent = mobileNumber;
+                
+                // Update steps UI
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+                
+                // Auto-focus first OTP input
+                document.querySelector('.otp-input').focus();
+            });
+            
+            // OTP input handling
+            const otpInputs = document.querySelectorAll('.otp-input');
+            otpInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.value.length === 1) {
+                        const nextIndex = parseInt(this.getAttribute('data-index')) + 1;
+                        if (nextIndex < otpInputs.length) {
+                            otpInputs[nextIndex].focus();
+                        }
+                    }
+                });
+                
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Backspace' && this.value.length === 0) {
+                        const prevIndex = parseInt(this.getAttribute('data-index')) - 1;
+                        if (prevIndex >= 0) {
+                            otpInputs[prevIndex].focus();
+                        }
+                    }
+                });
+            });
+            
+            document.getElementById('back-to-mobile').addEventListener('click', function() {
+                document.getElementById('mobile-step1').style.display = 'block';
+                document.getElementById('mobile-step2').style.display = 'none';
+                
+                // Update steps UI
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('step1').classList.remove('completed');
+                document.getElementById('step2').classList.remove('active');
+            });
+            
+            document.getElementById('resend-otp').addEventListener('click', function(e) {
+                e.preventDefault();
+                // In a real app, you would resend OTP
+                alert('New OTP has been sent to your mobile number');
+            });
+            
+            document.getElementById('verify-otp').addEventListener('click', function() {
+                let otp = '';
+                otpInputs.forEach(input => {
+                    otp += input.value;
+                });
+                
+                const errorElement = document.getElementById('otp-error');
+                
+                // Simple validation
+                if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+                    errorElement.textContent = 'Please enter a valid 6-digit OTP';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // In a real app, you would verify OTP with server
+                // For demo, we'll proceed to success step
+                document.getElementById('mobile-step2').style.display = 'none';
+                document.getElementById('mobile-step3').style.display = 'block';
+                
+                // Update steps UI
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step2').classList.add('completed');
+                document.getElementById('step3').classList.add('active');
+                
+                // Update mobile number in UI
+                const newNumber = document.getElementById('new-mobile').value;
+                document.getElementById('mobile-number-info').textContent = newNumber;
+            });
+            
+            document.getElementById('finish-mobile').addEventListener('click', function() {
+                closeModal('mobile');
+                
+                // Reset modal for next time
+                document.getElementById('mobile-step1').style.display = 'block';
+                document.getElementById('mobile-step2').style.display = 'none';
+                document.getElementById('mobile-step3').style.display = 'none';
+                document.getElementById('new-mobile').value = '';
+                document.getElementById('mobile-error').style.display = 'none';
+                document.getElementById('otp-error').style.display = 'none';
+                otpInputs.forEach(input => input.value = '');
+                
+                // Reset steps UI
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('step1').classList.remove('completed');
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step2').classList.remove('completed');
+                document.getElementById('step3').classList.remove('active');
             });
         });
     </script>
