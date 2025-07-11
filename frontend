@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Settings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .security-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .security-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .security-header h2 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .security-tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 25px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .activity-card {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .activity-card:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .activity-info {
+            flex: 1;
+        }
+        
+        .activity-info h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .activity-info p {
+            margin: 0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .activity-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background-color: #e8f8f5;
+            color: #27ae60;
+        }
+        
+        .status-warning {
+            background-color: #fef9e7;
+            color: #f39c12;
+        }
+        
+        .status-danger {
+            background-color: #fdedec;
+            color: #e74c3c;
+        }
+        
+        .device-icon {
+            margin-right: 15px;
+            font-size: 24px;
+            color: #3498db;
+        }
+        
+        .activity-meta {
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+        
+        .btn-outline:hover {
+            background: #f5f5f5;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-danger {
+            background-color: #fdedec;
+            color: #e74c3c;
+        }
+        
+        .btn-danger:hover {
+            background-color: #fadbd8;
+        }
+        
+        .no-activity {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+        
+        .session-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .preference-item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .preference-item h4 {
+            margin: 0 0 5px 0;
+        }
+        
+        .preference-item p {
+            margin: 0 0 15px 0;
+            color: #7f8c8d;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #95a5a6;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        
+        .backup-codes {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-family: monospace;
+            text-align: center;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .activity-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .activity-meta {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .session-controls {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .security-tabs {
+                padding-bottom: 5px;
+            }
+            
+            .tab {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                margin: 15px;
+                width: calc(100% - 30px);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .session-controls {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+            }
+            
+            .modal-footer .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="security-container">
+        <div class="security-header">
+            <h2>Security Settings</h2>
+        </div>
+        
+        <div class="security-tabs">
+            <div class="tab active" data-tab="activity">Recent Activity</div>
+            <div class="tab" data-tab="sessions">Active Sessions</div>
+            <div class="tab" data-tab="settings">Security Settings</div>
+        </div>
+        
+        <div class="tab-content active" id="activity">
+            <h3 class="section-title">Recent Login Activity</h3>
+            
+            <div id="activity-list">
+                <!-- Activity items will be added here dynamically -->
+            </div>
+            
+            <div class="no-activity" id="no-activity" style="display: none;">
+                <p>No recent login activity found</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="sessions">
+            <h3 class="section-title">Active Sessions</h3>
+            
+            <div id="sessions-list">
+                <!-- Session items will be added here dynamically -->
+            </div>
+            
+            <div class="no-activity" id="no-sessions" style="display: none;">
+                <p>No active sessions found</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="settings">
+            <h3 class="section-title">Security Preferences</h3>
+            
+            <div class="preference-item">
+                <h4>Two-Factor Authentication</h4>
+                <p>Add an extra layer of security to your account</p>
+                <button class="btn btn-outline" id="enable-2fa">Enable 2FA</button>
+                <div id="2fa-status" style="margin-top: 10px; display: none;">
+                    <p style="color: #27ae60;"><i class="fas fa-check-circle"></i> Two-factor authentication is enabled</p>
+                </div>
+            </div>
+            
+            <div class="preference-item">
+                <h4>Password</h4>
+                <p id="password-change-info">Last changed 2 weeks ago</p>
+                <button class="btn btn-outline" id="change-password">Change Password</button>
+            </div>
+            
+            <div class="preference-item" style="border-bottom: none;">
+                <h4>Security Alerts</h4>
+                <p>Receive notifications for unusual activity</p>
+                <div>
+                    <label style="margin-right: 15px;">
+                        <input type="radio" name="alerts" checked> Email Alerts
+                    </label>
+                    <label>
+                        <input type="radio" name="alerts"> Push Notifications
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2FA Setup Modal -->
+    <div class="modal" id="2fa-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Set Up Two-Factor Authentication</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div id="2fa-setup-step1">
+                <p>Scan the QR code below with your authenticator app:</p>
+                <div class="qr-code">
+                    <!-- In a real app, this would be a generated QR code -->
+                    <div style="width: 200px; height: 200px; margin: 0 auto; background-color: #eee; display: flex; justify-content: center; align-items: center;">
+                        [QR Code Placeholder]
+                    </div>
+                    <p style="margin-top: 10px; font-family: monospace;">SECRETKEY: JBSWY3DPEHPK3PXP</p>
+                </div>
+                <p>Or enter this code manually: <strong>JBSWY3DPEHPK3PXP</strong></p>
+                <div class="form-group">
+                    <label for="2fa-code">Enter the 6-digit code from your app:</label>
+                    <input type="text" id="2fa-code" placeholder="123456" maxlength="6">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline" id="cancel-2fa">Cancel</button>
+                    <button class="btn btn-primary" id="verify-2fa">Verify</button>
+                </div>
+            </div>
+            <div id="2fa-setup-step2" style="display: none;">
+                <p><i class="fas fa-check-circle" style="color: #27ae60; font-size: 24px;"></i></p>
+                <h4>Two-Factor Authentication Enabled</h4>
+                <p>Your account is now more secure with 2FA enabled.</p>
+                <div class="backup-codes">
+                    <p><strong>Backup Codes</strong></p>
+                    <p>Save these codes in a safe place. Each code can be used once.</p>
+                    <div style="text-align: center; margin: 10px 0;">
+                        <p>ABCDE-12345<br>FGHIJ-67890<br>KLMNO-24680<br>PQRST-13579</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" id="finish-2fa">Finish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="current-password">Current Password</label>
+                <input type="password" id="current-password" placeholder="Enter your current password">
+            </div>
+            <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" placeholder="Enter your new password">
+                <p style="font-size: 12px; color: #7f8c8d; margin-top: 5px;">Password must be at least 8 characters long</p>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input type="password" id="confirm-password" placeholder="Confirm your new password">
+            </div>
+            <div id="password-error" style="color: #e74c3c; margin-bottom: 15px; display: none;"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-password">Cancel</button>
+                <button class="btn btn-primary" id="save-password">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching functionality
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Sample data for recent activity
+            const recentActivity = [
+                {
+                    id: 1,
+                    device: 'Windows 10 - Chrome',
+                    location: 'New York, NY, USA',
+                    ip: '192.168.1.1',
+                    time: '10 minutes ago',
+                    status: 'success',
+                    icon: '💻'
+                },
+                {
+                    id: 2,
+                    device: 'iPhone 13 - Safari',
+                    location: 'San Francisco, CA, USA',
+                    ip: '172.56.23.45',
+                    time: '2 hours ago',
+                    status: 'success',
+                    icon: '📱'
+                },
+                {
+                    id: 3,
+                    device: 'MacBook Pro - Firefox',
+                    location: 'London, UK',
+                    ip: '86.145.32.12',
+                    time: 'Yesterday',
+                    status: 'warning',
+                    icon: '💻'
+                },
+                {
+                    id: 4,
+                    device: 'Android - Chrome',
+                    location: 'Tokyo, Japan',
+                    ip: '210.153.84.25',
+                    time: '3 days ago',
+                    status: 'danger',
+                    icon: '📱'
+                }
+            ];
+            
+            // Sample data for active sessions
+            const activeSessions = [
+                {
+                    id: 1,
+                    device: 'Windows 10 - Chrome',
+                    location: 'New York, NY, USA',
+                    ip: '192.168.1.1',
+                    time: 'Active now',
+                    icon: '💻'
+                },
+                {
+                    id: 2,
+                    device: 'iPhone 13 - Safari',
+                    location: 'San Francisco, CA, USA',
+                    ip: '172.56.23.45',
+                    time: 'Active 15 minutes ago',
+                    icon: '📱'
+                }
+            ];
+            
+            // Render recent activity
+            const activityList = document.getElementById('activity-list');
+            const noActivity = document.getElementById('no-activity');
+            
+            if (recentActivity.length > 0) {
+                noActivity.style.display = 'none';
+                recentActivity.forEach(activity => {
+                    const statusClass = `status-${activity.status}`;
+                    const activityItem = document.createElement('div');
+                    activityItem.className = 'activity-card';
+                    activityItem.innerHTML = `
+                        <div class="activity-meta">
+                            <span class="device-icon">${activity.icon}</span>
+                            <div class="activity-info">
+                                <h4>${activity.device}</h4>
+                                <p>${activity.location} (${activity.ip}) · ${activity.time}</p>
+                            </div>
+                        </div>
+                        <span class="activity-status ${statusClass}">
+                            ${activity.status === 'success' ? 'Successful' : 
+                              activity.status === 'warning' ? 'Suspicious' : 'Failed'}
+                        </span>
+                    `;
+                    activityList.appendChild(activityItem);
+                });
+            } else {
+                noActivity.style.display = 'block';
+            }
+            
+            // Render active sessions
+            const sessionsList = document.getElementById('sessions-list');
+            const noSessions = document.getElementById('no-sessions');
+            
+            if (activeSessions.length > 0) {
+                noSessions.style.display = 'none';
+                activeSessions.forEach(session => {
+                    const sessionItem = document.createElement('div');
+                    sessionItem.className = 'activity-card';
+                    sessionItem.innerHTML = `
+                        <div class="activity-meta">
+                            <span class="device-icon">${session.icon}</span>
+                            <div class="activity-info">
+                                <h4>${session.device}</h4>
+                                <p>${session.location} (${session.ip}) · ${session.time}</p>
+                            </div>
+                        </div>
+                        <div class="session-controls">
+                            <button class="btn btn-outline">Details</button>
+                            <button class="btn btn-danger" data-session-id="${session.id}">Log Out</button>
+                        </div>
+                    `;
+                    sessionsList.appendChild(sessionItem);
+                });
+                
+                // Add event listeners to logout buttons
+                document.querySelectorAll('.btn-danger').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const sessionId = this.getAttribute('data-session-id');
+                        if (confirm('Are you sure you want to log out this device?')) {
+                            // In a real app, you would send an API request here
+                            alert(`Session ${sessionId} has been logged out`);
+                            // Remove the session from the UI
+                            this.closest('.activity-card').remove();
+                            
+                            // Check if any sessions left
+                            if (document.querySelectorAll('#sessions-list .activity-card').length === 0) {
+                                noSessions.style.display = 'block';
+                            }
+                        }
+                    });
+                });
+            } else {
+                noSessions.style.display = 'block';
+            }
+            
+            // Modal functionality
+            const modals = {
+                '2fa': document.getElementById('2fa-modal'),
+                'password': document.getElementById('password-modal')
+            };
+            
+            const openModal = (modalId) => {
+                modals[modalId].style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+            
+            const closeModal = (modalId) => {
+                modals[modalId].style.display = 'none';
+                document.body.style.overflow = 'auto';
+            };
+            
+            // Close modals when clicking X or cancel buttons
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modalId = this.closest('.modal').id.replace('-modal', '');
+                    closeModal(modalId);
+                });
+            });
+            
+            document.getElementById('cancel-2fa').addEventListener('click', () => closeModal('2fa'));
+            document.getElementById('cancel-password').addEventListener('click', () => closeModal('password'));
+            
+            // Close modal when clicking outside content
+            Object.values(modals).forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        const modalId = this.id.replace('-modal', '');
+                        closeModal(modalId);
+                    }
+                });
+            });
+            
+            // 2FA Setup Flow
+            let is2faEnabled = false;
+            
+            document.getElementById('enable-2fa').addEventListener('click', function() {
+                if (is2faEnabled) {
+                    if (confirm('Do you want to disable Two-Factor Authentication?')) {
+                        is2faEnabled = false;
+                        document.getElementById('2fa-status').style.display = 'none';
+                        this.textContent = 'Enable 2FA';
+                    }
+                } else {
+                    openModal('2fa');
+                }
+            });
+            
+            document.getElementById('verify-2fa').addEventListener('click', function() {
+                const code = document.getElementById('2fa-code').value;
+                
+                // Simple validation - in a real app, you would verify with server
+                if (code.length === 6 && /^\d+$/.test(code)) {
+                    document.getElementById('2fa-setup-step1').style.display = 'none';
+                    document.getElementById('2fa-setup-step2').style.display = 'block';
+                } else {
+                    alert('Please enter a valid 6-digit code');
+                }
+            });
+            
+            document.getElementById('finish-2fa').addEventListener('click', function() {
+                is2faEnabled = true;
+                document.getElementById('2fa-status').style.display = 'block';
+                document.getElementById('enable-2fa').textContent = 'Disable 2FA';
+                closeModal('2fa');
+                // Reset modal for next time
+                document.getElementById('2fa-setup-step1').style.display = 'block';
+                document.getElementById('2fa-setup-step2').style.display = 'none';
+                document.getElementById('2fa-code').value = '';
+            });
+            
+            // Password Change Flow
+            document.getElementById('change-password').addEventListener('click', function() {
+                openModal('password');
+            });
+            
+            document.getElementById('save-password').addEventListener('click', function() {
+                const currentPass = document.getElementById('current-password').value;
+                const newPass = document.getElementById('new-password').value;
+                const confirmPass = document.getElementById('confirm-password').value;
+                const errorElement = document.getElementById('password-error');
+                
+                // Reset error
+                errorElement.style.display = 'none';
+                
+                // Validation
+                if (!currentPass || !newPass || !confirmPass) {
+                    errorElement.textContent = 'All fields are required';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                if (newPass.length < 8) {
+                    errorElement.textContent = 'Password must be at least 8 characters';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                if (newPass !== confirmPass) {
+                    errorElement.textContent = 'New passwords do not match';
+                    errorElement.style.display = 'block';
+                    return;
+                }
+                
+                // In a real app, you would send this to your server
+                // For demo purposes, we'll just show a success message
+                alert('Password changed successfully!');
+                document.getElementById('password-change-info').textContent = 'Last changed just now';
+                closeModal('password');
+                
+                // Clear form
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            });
+        });
+    </script>
+</body>
+</html>
